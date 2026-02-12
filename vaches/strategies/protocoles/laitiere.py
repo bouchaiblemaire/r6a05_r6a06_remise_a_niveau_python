@@ -21,4 +21,4 @@ class RuminationLaitiere(RuminationStrategy):
         return lait
 
     def post_rumination(self, vache, panse_avant: float) -> None:
-        ...
+        pass

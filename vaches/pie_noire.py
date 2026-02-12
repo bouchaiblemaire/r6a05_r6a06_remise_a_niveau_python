@@ -1,7 +1,7 @@
 from vaches.vache_a_lait import VacheALait
 from vaches.exceptions import InvalidVacheException
 from nourriture.TypeNourriture import TypeNourriture
-from vaches.strategies.pie_noire import RuminationPieNoire
+from vaches.strategies.protocoles.pie_noire import RuminationPieNoire
 
 class PieNoire(VacheALait):
     # --- Constantes ---
@@ -13,8 +13,8 @@ class PieNoire(VacheALait):
         TypeNourriture.CEREALES: 1.3,
     }
 
-    def __init__(self, petitNom: str, poids: float, age: int, panse: float = 0.0):
-        super().__init__(petitNom, poids, age, panse)
+    def __init__(self, petitNom: str, poids: float, panse: float = 0.0):
+        super().__init__(petitNom, poids, panse)
         self._ration: dict[TypeNourriture, float] = {}
         # Surcharge de la stratégie
         self._strategy = RuminationPieNoire()

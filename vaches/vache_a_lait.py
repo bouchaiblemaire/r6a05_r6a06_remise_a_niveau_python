@@ -1,13 +1,13 @@
 from vaches.vache import Vache
 from vaches.exceptions import InvalidVacheException
-from vaches.strategies.laitiere import RuminationLaitiere
+from vaches.strategies.protocoles.laitiere import RuminationLaitiere
 
 class VacheALait(Vache):
     RENDEMENT_LAIT = 1.1
     PRODUCTION_LAIT_MAX = 40.0
 
-    def __init__(self, petitNom: str, poids: float, age: int, panse: float = 0.0):
-        super().__init__(petitNom, poids, age)
+    def __init__(self, petitNom: str, poids: float, panse: float = 0.0):
+        super().__init__(petitNom, poids, panse)
         # On initialise la panse avec la valeur reçue (le parent la met à 0 par défaut)
         if panse < 0:
             raise InvalidVacheException("La panse initiale ne peut pas être négative.")

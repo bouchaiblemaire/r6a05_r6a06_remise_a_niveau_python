@@ -1,23 +1,22 @@
 from vaches.exceptions import InvalidVacheException
 
 from vaches.strategies.protocoles.rumination import RuminationStrategy
-from vaches.strategies.standard import RuminationStandard
+from vaches.strategies.protocoles.standard import RuminationStandard
 
 class Vache:
     # --- Constantes ---
     AGE_MAX = 25
+    AGE_NAISSANCE = 0
     POIDS_MAX = 1000.0
     PANSE_MAX = 200.0
     RENDEMENT_RUMINATION = 0.25
 
-    def __init__(self, petitNom: str, poids: float, age: int, panse: float = 0.0):
+    def __init__(self, petitNom: str, poids: float, panse: float = 0.0):
         # Validation du nom (non vide, pas que des espaces)
         if not petitNom or not petitNom.strip():
             raise InvalidVacheException("Le petit nom ne peut pas être vide.")
         
-        # Validation de l'âge
-        if not (0 <= age <= self.AGE_MAX):
-            raise InvalidVacheException(f"L'âge doit être entre 0 et {self.AGE_MAX} ans.")
+
         
         # Validation du poids
         if poids < 0 or poids > self.POIDS_MAX:
@@ -25,7 +24,7 @@ class Vache:
             
         self.petitNom = petitNom
         self._poids = poids
-        self._age = age
+        self._age = self.AGE_NAISSANCE
         self._panse = panse
         self._lait_disponible = 0.0
         self._lait_total_produit = 0.0
