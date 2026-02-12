@@ -1,6 +1,7 @@
 from vaches.vache_a_lait import VacheALait
 from vaches.exceptions import InvalidVacheException
 from nourriture.TypeNourriture import TypeNourriture
+from vaches.strategies.pie_noire import RuminationPieNoire
 
 class PieNoire(VacheALait):
     # --- Constantes ---
@@ -15,6 +16,8 @@ class PieNoire(VacheALait):
     def __init__(self, petitNom: str, poids: float, age: int, panse: float = 0.0):
         super().__init__(petitNom, poids, age, panse)
         self._ration: dict[TypeNourriture, float] = {}
+        # Surcharge de la stratégie
+        self._strategy = RuminationPieNoire()
 
     def brouter(self, quantite: float, nourriture: TypeNourriture = None):
         if quantite <= 0:
@@ -33,40 +36,15 @@ class PieNoire(VacheALait):
             self._ration[nourriture] += quantite
         
         # On met à jour la panse via la logique de base (Vache)
-        # Mais VacheALait n'overload pas brouter, Vache le fait.
-        # Dans Vache.brouter(quantite, nourriture=None):
-        # if nourriture is not None: raise InvalidVacheException
+        # self.brouter() dans Vache ferait un check "nourriture is not None" qui failerait.
+        # Donc on contourne en appelant le brouter de Vache SANS nourriture, 
+        # car on a déjà géré la partie "nourriture" ci-dessus.
         
-        # So we should call Vache.brouter(quantite) directly or avoid calling super().brouter(quantite, nourriture)
-        # if we want to bypass the "no food" check.
-        # However, Vache.brouter performs the panse limit check.
+        # Astuce : on appelle Vache.brouter(self, quantite) directement pour éviter la surcharge éventuelle
+        # ou simplement super().brouter(quantite) car VacheALait n'a pas de brouter.
         
-        # Let's bypass the "no food" check by calling the implementation logic or 
-        # by calling super(VacheALait, self).brouter(quantite) if we want to target Vache.
-        # Actually Vache is the one that has the check.
-        
-        # If I call super().brouter(quantite), it calls VacheALait.brouter (not defined) -> Vache.brouter.
-        # But Vache.brouter(quantite) is fine, it only raises if nourriture is NOT None.
-        
-        super(VacheALait, self).brouter(quantite) # This calls Vache.brouter(quantite)
+        # IMPORTANT: Vache.brouter(quantite, nourriture=None) lève une exception si nourriture n'est pas None.
+        # Ici on appelle super().brouter(quantite) (donc nourriture=None implicite), ce qui est valide pour Vache.
+        super(VacheALait, self).brouter(quantite)
 
-    def _calculer_lait(self, panse_avant: float) -> float:
-        if not self._ration:
-            return super()._calculer_lait(panse_avant)
-        
-        # Calcul basé sur la ration typée
-        somme_ponderee = 0.0
-        for type_n, quantite in self._ration.items():
-            coef = self.COEFFICIENT_LAIT_PAR_NOURRITURE.get(type_n, 1.0)
-            somme_ponderee += quantite * coef
-        
-        lait = self.RENDEMENT_LAIT * somme_ponderee
-        
-        if self._lait_disponible + lait > self.PRODUCTION_LAIT_MAX:
-             raise InvalidVacheException("La production de lait dépasse la capacité maximale de la vache.")
-        
-        return lait
-
-    def _post_rumination(self, panse_avant: float):
-        # La ration typée est consommée après rumination
-        self._ration.clear()
+    # Les hooks _calculer_lait et _post_rumination sont supprimés car gérés par la stratégie.

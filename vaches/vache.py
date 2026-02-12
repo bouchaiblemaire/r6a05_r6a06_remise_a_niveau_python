@@ -1,5 +1,8 @@
 from vaches.exceptions import InvalidVacheException
 
+from vaches.strategies.protocoles.rumination import RuminationStrategy
+from vaches.strategies.standard import RuminationStandard
+
 class Vache:
     # --- Constantes ---
     AGE_MAX = 25
@@ -27,6 +30,9 @@ class Vache:
         self._lait_disponible = 0.0
         self._lait_total_produit = 0.0
         self._lait_total_traite = 0.0
+        
+        # Initialisation de la stratégie par défaut
+        self._strategy: RuminationStrategy = RuminationStandard()
 
     # --- Properties (pour accès contrôlé) ---
     @property
@@ -62,6 +68,7 @@ class Vache:
     def ruminer(self) -> float:
         """
         Template Method : définit le squelette de l'algorithme de rumination.
+        Utilise maintenant une Stratégie pour les calculs.
         """
         # 1. Vérification
         if self._panse <= 0:
@@ -74,28 +81,23 @@ class Vache:
         gain_poids = self.RENDEMENT_RUMINATION * panse_avant
         self._poids += gain_poids
 
-        # 4. Calcul production de lait (Hook)
-        lait_produit = self._calculer_lait(panse_avant)
+        # 4. Calcul production de lait (via Stratégie)
+        lait_produit = self._strategy.calculer_production(self, panse_avant)
 
-        # 5. Stockage du lait (Hook)
+        # 5. Stockage du lait (Hook conservé ou géré par VacheALait)
         self._stocker_lait(lait_produit)
 
         # 6. Vider la panse
         self._panse = 0.0
 
-        # 7. Post-traitement (Hook)
-        self._post_rumination(panse_avant)
+        # 7. Post-traitement (via Stratégie)
+        self._strategy.post_rumination(self, panse_avant)
 
         # 8. Retourner la quantité
         return lait_produit
 
-    # --- Hooks (à redéfinir dans les sous-classes) ---
-    def _calculer_lait(self, panse_avant: float) -> float:
-        return 0.0  # Une vache standard ne produit pas de lait
-
+    # --- Hooks ---
     def _stocker_lait(self, quantite: float):
         pass
 
-    def _post_rumination(self, panse_avant: float):
-        pass
 

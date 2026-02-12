@@ -1,5 +1,6 @@
 from vaches.vache import Vache
 from vaches.exceptions import InvalidVacheException
+from vaches.strategies.laitiere import RuminationLaitiere
 
 class VacheALait(Vache):
     RENDEMENT_LAIT = 1.1
@@ -17,6 +18,8 @@ class VacheALait(Vache):
         self._lait_disponible = 0.0
         self._lait_total_produit = 0.0
         self._lait_total_traite = 0.0
+        
+        self._strategy = RuminationLaitiere()
 
     @property
     def lait_disponible(self):
@@ -41,13 +44,7 @@ class VacheALait(Vache):
         return litres
 
     # --- Hooks (Design Pattern Template Method) ---
-    
-    def _calculer_lait(self, panse_avant: float) -> float:
-        lait = self.RENDEMENT_LAIT * panse_avant
-        # On vérifie si on ne dépasse pas la capacité de stockage
-        if self._lait_disponible + lait > self.PRODUCTION_LAIT_MAX:
-             raise InvalidVacheException("La production de lait dépasse la capacité maximale de la vache.")
-        return lait
+    # _calculer_lait supprimé car délégué à la stratégie
 
     def _stocker_lait(self, quantite: float):
         self._lait_disponible += quantite
